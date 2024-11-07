@@ -31,20 +31,25 @@ class FirebaseSerice {
     try {
       UserCredential userCredential = await _auth
           .createUserWithEmailAndPassword(email: email, password: password);
-      String userid = userCredential.user!.uid;
-      String filename = Timestamp.now().millisecondsSinceEpoch.toString() +
-          p.extension(image.path);
-      UploadTask task =
-          _storage.ref('/images/$userid/$filename').putFile(image);
-      return task.then((snapshot) async {
-        String downloadurl = await snapshot.ref.getDownloadURL();
-        await _db.collection('users').doc(userid).set({
-          'name': name,
-          'email': email,
-          'imagepath': downloadurl,
+      if (userCredential.user != null) {
+        String userid = userCredential.user!.uid;
+        String filename = Timestamp.now().millisecondsSinceEpoch.toString() +
+            p.extension(image.path);
+        UploadTask task =
+            _storage.ref('/images/$userid/$filename').putFile(image);
+        return task.then((snapshot) async {
+          String downloadurl = await snapshot.ref.getDownloadURL();
+          await _db.collection('users').doc(userid).set({
+            'name': name,
+            'email': email,
+            'image': downloadurl,
+          });
+          return true;
         });
-        return true;
-      });
+      } else {
+        print('user not created');
+        return false;
+      }
     } catch (e) {
       return false;
     }
@@ -68,5 +73,10 @@ class FirebaseSerice {
         return true;
       },
     );
+  }
+
+  getposts() {
+    String userid = _auth.currentUser!.uid;
+    return _db.collection('posts').where('uid', isEqualTo: userid).snapshots();
   }
 }

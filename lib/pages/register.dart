@@ -31,12 +31,12 @@ class _RegisteruserState extends State<Registeruser> {
 
   Widget _profileimage() {
     ImageProvider? imageProvider;
-    imageProvider = image != null
-        ? FileImage(image!)
-        : const NetworkImage('https://i.pravatar.cc/300');
+    imageProvider =
+        image != null ? FileImage(image!) : AssetImage('assets/1.jpg');
+
     return GestureDetector(
       onDoubleTap: () {
-        FilePicker.platform.pickFiles().then((value) {
+        FilePicker.platform.pickFiles(type: FileType.image).then((value) {
           if (value != null) {
             setState(() {
               image = File(value.files.first.path!);
@@ -50,7 +50,7 @@ class _RegisteruserState extends State<Registeruser> {
         decoration: BoxDecoration(
           image: DecorationImage(
             fit: BoxFit.cover,
-            image: imageProvider as ImageProvider,
+            image: AssetImage(image != null ? image!.path : 'assets/1.jpg'),
           ),
         ),
       ),
@@ -205,6 +205,11 @@ class _RegisteruserState extends State<Registeruser> {
               );
             });
       }
+    } else {
+      print('error in input');
+    }
+    if (image == null) {
+      print(image);
     }
   }
 
